@@ -14,15 +14,21 @@ from api.views.Accountability.accountability_view import AccountabilityViewSet
 from api.views.items.ItemsViews import ItemViewSet 
 
 router = DefaultRouter()
+# CRUD de posts (ONGs) (/api/posts/)
 router.register(r'posts', PostViewSet, basename='post')
+# CRUD de FAQs (perguntas e respostas) (/api/faqs/)
 router.register(r'faqs', FaqViewsSet, basename='faq')
-
-# Novas rotas
+# CRUD de necessidades das ONGs (/api/necessities/)
 router.register(r'necessities', NecessityViewSet, basename='necessity')
+# CRUD de doações (/api/donations/)
 router.register(r'donations', DonationViewSet, basename='donation')
+# CRUD de informações de pagamento das ONGs (/api/payment-info/)
 router.register(r'payment-info', PaymentInfoViewSet, basename='payment-info')
+# CRUD de relatórios de doação (/api/donation-reports/)
 router.register(r'donation-reports', DonationReportViewSet, basename='donation-report')
+# CRUD de prestação de contas (/api/accountability/)
 router.register(r'accountability', AccountabilityViewSet, basename='accountability')
+# CRUD de itens (/api/items/)
 router.register(r'items', ItemViewSet, basename='item')
 
 urlpatterns = [
