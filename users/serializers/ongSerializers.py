@@ -1,3 +1,4 @@
+# serializers.py
 from rest_framework import serializers
 from users.models import Ong, CustomUser
 from api.models import Necessity, Post, Faq, Donation, Avaliation

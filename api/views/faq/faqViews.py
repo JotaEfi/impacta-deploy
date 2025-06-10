@@ -14,7 +14,5 @@ class FaqViewsSet(viewsets.ModelViewSet):
         if not self.request.user.is_authenticated:
             raise ValidationError("Usuário não autenticado.")
         if self.request.user.user_type != userType.ONG:
-            raise ValidationError(
-                "Apenas ONGs podem criar perguntas e respostas no FAQ."
-            )
+            raise ValidationError("Apenas ONGs podem criar perguntas e respostas no FAQ.")
         serializer.save(org_user=self.request.user)
