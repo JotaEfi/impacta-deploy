@@ -105,3 +105,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['user_type'] = user.user_type  # Adiciona o tipo de usuário ao token
         return token
 
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        data['user_type'] = self.user.user_type  # Inclui user_type na resposta do login
+        return data
+

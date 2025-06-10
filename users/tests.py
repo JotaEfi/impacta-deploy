@@ -6,6 +6,8 @@ from users.models import CustomUser, userType
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 
+User = get_user_model()
+
 class UserAuthenticationTests(TestCase):
     def setUp(self):
         """Configuração inicial para os testes"""
@@ -15,16 +17,20 @@ class UserAuthenticationTests(TestCase):
         self.refresh_url = reverse('token_refresh')
         self.profile_url = reverse('user_profile')
         self.change_password_url = reverse('change_password')
-        
         # Dados de teste para registro
         self.user_data = {
             'email': 'test@example.com',
             'username': 'testuser',
             'password': 'Test123456!',
             'password2': 'Test123456!',
-            'user_type': userType.DONOR
+            'user_type': userType.DONOR,
+            'city': 'São Paulo',
+            'state': 'SP',
+            'address': 'Rua Teste, 123',
+            'postal_code': '01000-000',
+            'first_name': 'Ana',
+            'last_name': 'Silva'
         }
-        
         # Dados de teste para login
         self.login_data = {
             'email': 'test@example.com',
@@ -160,6 +166,13 @@ class UserAuthenticationTests(TestCase):
         ong_data['email'] = 'ong@example.com'
         ong_data['username'] = 'onguser'
         ong_data['user_type'] = userType.ONG
+        ong_data['city'] = 'São Paulo'
+        ong_data['state'] = 'SP'
+        ong_data['address'] = 'Rua ONG, 123'
+        ong_data['postal_code'] = '01001-000'
+        ong_data['first_name'] = 'ONG'
+        ong_data['last_name'] = 'Teste'
+        ong_data['ong_name'] = 'ONG Teste'
         response = self.client.post(self.register_url, ong_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(CustomUser.objects.get(email='ong@example.com').user_type, userType.ONG)
@@ -169,6 +182,12 @@ class UserAuthenticationTests(TestCase):
         donor_data['email'] = 'donor@example.com'
         donor_data['username'] = 'donoruser'
         donor_data['user_type'] = userType.DONOR
+        donor_data['city'] = 'São Paulo'
+        donor_data['state'] = 'SP'
+        donor_data['address'] = 'Rua Doador, 456'
+        donor_data['postal_code'] = '01002-000'
+        donor_data['first_name'] = 'Doador'
+        donor_data['last_name'] = 'Teste'
         response = self.client.post(self.register_url, donor_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(CustomUser.objects.get(email='donor@example.com').user_type, userType.DONOR)
@@ -261,3 +280,37 @@ class UserAuthenticationTests(TestCase):
         response = self.client.post(self.change_password_url, wrong_password_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('old_password', response.data)
+
+class UserModelTest(TestCase):
+    def test_create_user(self):
+        user = User.objects.create_user(username='testuser', email='test@example.com', password='testpass123', user_type='ONG')
+        self.assertEqual(user.username, 'testuser')
+        self.assertTrue(user.check_password('testpass123'))
+        self.assertEqual(user.user_type, 'ONG')
+
+class TokenObtainTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='jwtuser',
+            email='jwt@example.com',
+            password='jwtpass123',
+            user_type='ONG',
+            city='São Paulo',
+            state='SP',
+            address='Rua JWT, 789',
+            postal_code='01003-000',
+            first_name='JWT',
+            last_name='User'
+        )
+        # Criar perfil de ONG para o usuário
+        from users.models import Ong
+        Ong.objects.create(user=self.user, name='ONG JWT', description='ONG para teste JWT')
+        self.client = APIClient()
+
+    def test_jwt_token_includes_user_type(self):
+        url = reverse('token_obtain_pair')
+        response = self.client.post(url, {'email': 'jwt@example.com', 'password': 'jwtpass123'})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('access', response.data)
+        self.assertIn('user_type', response.data)
+        self.assertEqual(response.data['user_type'], 'ONG')
