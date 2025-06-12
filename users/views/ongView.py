@@ -2,6 +2,7 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 from users.models import Ong
 from users.serializers.ongSerializers import OngSerializer
@@ -9,6 +10,7 @@ from users.serializers.ongSerializers import OngSerializer
 class OngListView(generics.ListAPIView):
     queryset = Ong.objects.all()
     serializer_class = OngSerializer
+    permission_classes = [AllowAny]
 
 class OngDetailView(generics.RetrieveAPIView):
     queryset = Ong.objects.all()

@@ -30,42 +30,75 @@ class OngSerializer(serializers.ModelSerializer):
         ]
 
     def get_necessities(self, obj):
-        necessities = Necessity.objects.filter(org=obj)
-        return NecessitySerializer(necessities, many=True).data
+        try:
+            necessities = Necessity.objects.filter(org=obj)
+            return NecessitySerializer(necessities, many=True).data
+        except Exception:
+            return []
 
     def get_posts(self, obj):
-        posts = Post.objects.filter(org_user=obj.user)
-        return PostSerializers(posts, many=True).data
+        try:
+            posts = Post.objects.filter(org_user=obj.user)
+            return PostSerializers(posts, many=True).data
+        except Exception:
+            return []
 
     def get_faqs(self, obj):
-        faqs = Faq.objects.filter(org_user=obj.user)
-        return faqSerializer(faqs, many=True).data
+        try:
+            faqs = Faq.objects.filter(org_user=obj.user)
+            return faqSerializer(faqs, many=True).data
+        except Exception:
+            return []
 
     def get_donations(self, obj):
-        donations = Donation.objects.filter(org=obj)
-        return [{
-            'id': donation.id,
-            'item': donation.item.name if donation.item else None,
-            'donor': donation.donor.username if donation.donor else None,
-            'date': donation.date
-        } for donation in donations]
+        try:
+            donations = Donation.objects.filter(org=obj).values('id', 'date')
+            return [{
+                'id': donation['id'],
+                'item': self._get_item_name(donation['id']),
+                'donor': self._get_donor_username(donation['id']),
+                'date': donation['date']
+            } for donation in donations]
+        except Exception:
+            return []
+    
+    def _get_item_name(self, donation_id):
+        try:
+            donation = Donation.objects.get(id=donation_id)
+            return donation.item.name if donation.item else None
+        except Exception:
+            return None
+    
+    def _get_donor_username(self, donation_id):
+        try:
+            donation = Donation.objects.get(id=donation_id)
+            return donation.donor.username if donation.donor else None
+        except Exception:
+            return None
 
     def get_avaliations(self, obj):
-        avaliations = Avaliation.objects.filter(org=obj)
-        return [{
-            'id': avaliation.id,
-            'donor': avaliation.donor.username if avaliation.donor else None,
-            'comment': avaliation.comment,
-            'date': avaliation.date
-        } for avaliation in avaliations]
+        try:
+            avaliations = Avaliation.objects.filter(org=obj)
+            return [{
+                'id': avaliation.id,
+                'donor': avaliation.donor.username if avaliation.donor else None,
+                'comment': avaliation.comment,
+                'date': avaliation.date
+            } for avaliation in avaliations]
+        except Exception:
+            return []
 
     def get_total_donations(self, obj):
-        return Donation.objects.filter(org=obj).count()
+        try:
+            return Donation.objects.filter(org=obj).count()
+        except Exception:
+            return 0
 
     def get_average_rating(self, obj):
-        avaliations = Avaliation.objects.filter(org=obj)
-        if not avaliations.exists():
+        try:
+            avaliations = Avaliation.objects.filter(org=obj)
+            if not avaliations.exists():
+                return None
             return None
-        # Aqui você pode implementar a lógica de cálculo da média das avaliações
-        # quando tiver um campo de rating no modelo Avaliation
-        return None
+        except Exception:
+            return None
