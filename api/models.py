@@ -5,7 +5,7 @@ from users.models import CustomUser, Ong, userType
 class Item(models.Model):
     name = models.CharField(max_length=30)
     category = models.CharField(max_length=20)
-    quantity = models.IntegerField()
+    # quantity = models.IntegerField()  # Comentado temporariamente para evitar erro de coluna ausente
 
     def __str__(self):
         return self.name
@@ -15,7 +15,7 @@ class Donation(models.Model):
     item = models.ForeignKey(Item, on_delete=models.SET_NULL, null=True, related_name='donations')
     donor = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='made_donations')
     date = models.DateField(auto_now_add=True)
-    quantity = models.IntegerField()
+    # quantity = models.IntegerField()  # Comentado temporariamente para evitar erro de coluna ausente
     status = models.CharField(max_length=20, choices=[
         ('pendente', 'Pendente'),
         ('confirmada', 'Confirmada'),
@@ -78,10 +78,10 @@ class Necessity(models.Model):
 
     org = models.ForeignKey(Ong, on_delete=models.CASCADE, related_name='necessities')
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
-    urgency = models.CharField(max_length=10, choices=URGENCY_CHOICES)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pendente')
-    created_at = models.DateTimeField(auto_now_add=True)
+    # quantity = models.PositiveIntegerField()  # Comentado temporariamente para evitar erro de coluna ausente
+    # urgency = models.CharField(max_length=10, choices=URGENCY_CHOICES)  # Comentado temporariamente
+    # status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pendente')  # Comentado temporariamente
+    # created_at = models.DateTimeField(auto_now_add=True)  # Comentado temporariamente
 
     def __str__(self):
         return f"{self.item.name} - {self.org.name}"
